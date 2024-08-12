@@ -3,13 +3,14 @@ import chisel3.util.{MuxCase, MuxLookup}
 import circt.stage.ChiselStage
 
 import Control._
+import Control.InternalOps._
 import Helpers._
 
 class Logical(bits: Int) extends Module {
     val io         = IO(new Bundle {
     val a          = Input(UInt(bits.W))
     val b          = Input(UInt(bits.W))
-    val internalOp = Input(UInt(4.W))
+    val internalOp = Input(Control.InternalOps())
     val invertIn   = Input(UInt(1.W))
     val invertOut  = Input(UInt(1.W))
     val length     = Input(UInt(2.W))

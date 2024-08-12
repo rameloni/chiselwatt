@@ -3,6 +3,7 @@ import tywaves.simulator.TywavesSimulator._
 import tywaves.simulator.simulatorSettings._
 //import chiseltest._
 import Control._
+import Control.InternalOps._
 import org.scalatest.flatspec.AnyFlatSpec
 
 class LoadStoreUnitTester extends AnyFlatSpec {

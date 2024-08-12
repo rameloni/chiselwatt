@@ -3,6 +3,7 @@ import circt.stage.ChiselStage
 import circt.stage.FirtoolOption
 import chisel3.util._
 import Control._
+import Control.InternalOps._
 import Helpers._
 import LoadStoreByteReverse._
 import chisel3.stage.ChiselGeneratorAnnotation
@@ -11,7 +12,7 @@ class LoadStoreInput(val bits: Int) extends Bundle {
   val a           = Input(UInt(bits.W))
   val b           = Input(UInt(bits.W))
   val data        = Input(UInt(bits.W))
-  val internalOp  = Input(UInt(1.W))
+  val internalOp  = Input(Control.InternalOps())
   val length      = Input(UInt(2.W))
   val signed      = Input(UInt(1.W))
   val byteReverse = Input(UInt(1.W))

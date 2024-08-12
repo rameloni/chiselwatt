@@ -1,3 +1,5 @@
+import Control.Unit._
+import Control.InternalOps._
 import chisel3._
 import circt.stage.ChiselStage
 import circt.stage.FirtoolOption
