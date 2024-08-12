@@ -1,6 +1,6 @@
 import chisel3._
 import chisel3.util.{PopCount, MuxLookup}
-import chisel3.stage.ChiselStage
+import circt.stage.ChiselStage
 
 import Control._
 import Helpers._
@@ -46,9 +46,9 @@ class PopulationCount(bits: Int) extends Module {
     .map{ case (a, padWidth) => a.map(_.pad(padWidth)).reduce(_ ## _) }
   })
 
-  io.out := MuxLookup(io.length, popCounts.head._1, popCounts)
+  io.out := MuxLookup(io.length, popCounts.head._1)(popCounts)
 }
 
 object PopulationCountObj extends App {
-  (new ChiselStage).emitVerilog(new PopulationCount(64))
+  println(ChiselStage.emitSystemVerilog(new PopulationCount(64)))
 }

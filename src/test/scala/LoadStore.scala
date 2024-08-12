@@ -1,12 +1,14 @@
 import chisel3._
-import chiseltest._
+import tywaves.simulator.TywavesSimulator._
+import tywaves.simulator.simulatorSettings._
+//import chiseltest._
 import Control._
 import org.scalatest.flatspec.AnyFlatSpec
 
-class LoadStoreUnitTester extends AnyFlatSpec with ChiselScalatestTester {
+class LoadStoreUnitTester extends AnyFlatSpec {
   val bits = 64
   val words = 1024
-  val filename = "LoadStoreInsns.hex"
+  val filename =  System.getProperty("user.dir") + "/LoadStoreInsns.hex"
   val frequency = 50000000
 
   private def doOneRead(m: LoadStoreWrapper, a: UInt, b: UInt, length: UInt, signed: UInt, byteReverse: UInt, expected: UInt) = {
@@ -55,14 +57,17 @@ class LoadStoreUnitTester extends AnyFlatSpec with ChiselScalatestTester {
       doOneRead(m, a, b, length, signed, byteReverse, data)
   }
 
-  reflect.io.File(filename).writeAll("0001020304050607\r\n08090A0B0C0D0E0F\r\n0F0E0D0C0B0A0908\r\n8080808080808080\r\n")
+  scala.reflect.io.File(filename).writeAll("0001020304050607\r\n08090A0B0C0D0E0F\r\n0F0E0D0C0B0A0908\r\n8080808080808080\r\n")
 
   behavior of "LoadStore"
   it should "pass a unit test" in {
-    test(new LoadStoreWrapper(bits, words, frequency, filename))
-      .withAnnotations(Seq(VerilatorBackendAnnotation, WriteVcdAnnotation)) { m =>
+    simulate(new LoadStoreWrapper(bits, words, frequency, filename), Seq(VcdTrace, WithTywavesWaveforms(true), SaveWorkdirFile("workDir")))
+//      .withAnnotations(Seq(VerilatorBackendAnnotation, WriteVcdAnnotation))
+      { m =>
 
+      // Load one byte
       doOneRead(m, 0.U, 0.U, LEN_1B, 0.U, 0.U, "h07".U)
+      // Load two bytes
       doOneRead(m, 0.U, 0.U, LEN_2B, 0.U, 0.U, "h0607".U)
       doOneRead(m, 0.U, 0.U, LEN_4B, 0.U, 0.U, "h04050607".U)
       doOneRead(m, 0.U, 0.U, LEN_8B, 0.U, 0.U, "h0001020304050607".U)

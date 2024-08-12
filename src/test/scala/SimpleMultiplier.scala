@@ -1,9 +1,11 @@
 import chisel3._
-import chiseltest._
+import tywaves.simulator.simulatorSettings.VcdTrace
+//import chiseltest._
+import tywaves.simulator.TywavesSimulator._
 import TestValues._
 import org.scalatest.flatspec.AnyFlatSpec
 
-class SimpleMultiplierUnitTester extends AnyFlatSpec with ChiselScalatestTester {
+class SimpleMultiplierUnitTester extends AnyFlatSpec {
   behavior of "SimpleMultiplier"
 
   val tests = for {
@@ -69,7 +71,7 @@ class SimpleMultiplierUnitTester extends AnyFlatSpec with ChiselScalatestTester 
   }
 
   it should "pass a unit test" in {
-    test(new SimpleMultiplier(64)) { m =>
+    simulate(new SimpleMultiplier(64), Seq(VcdTrace)) { m =>
 
       runOneTest(m, mult)
 

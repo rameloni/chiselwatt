@@ -37,7 +37,7 @@ object Helpers {
     def signExtend(from: UInt): UInt = {
       val lookupTable = Seq(LEN_1B, LEN_2B, LEN_4B).zip(Seq(8, 16, 32).map(frm => a(frm-1, 0).asSInt.pad(a.getWidth).asUInt))
 
-      MuxLookup(from, lookupTable.head._2, lookupTable)
+      MuxLookup(from, lookupTable.head._2)(lookupTable)
     }
   }
 
@@ -47,7 +47,7 @@ object Helpers {
     def zeroExtend(from: UInt): UInt = {
       val lookupTable = Seq(LEN_1B, LEN_2B, LEN_4B, LEN_8B).zip(Seq(8, 16, 32, 64).map(frm => a(frm-1, 0).pad(a.getWidth)))
 
-      MuxLookup(from, lookupTable.head._2, lookupTable)
+      MuxLookup(from, lookupTable.head._2)(lookupTable)
     }
   }
 }

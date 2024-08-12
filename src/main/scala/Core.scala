@@ -1,6 +1,6 @@
 import chisel3._
+import circt.stage.ChiselStage
 import chisel3.util._
-import chisel3.stage.ChiselStage
 
 import Control._
 import Helpers._
@@ -89,7 +89,7 @@ class Core(bits: Int, memSize: Int, memFileName: String, resetAddr: Int, clockFr
     ((control.io.out.rA === RA_RA_OR_ZERO) && (insn_ra(decodeInsn) === 0.U)) -> 0.U(bits.W)
   ))
 
-  val decodeRb = MuxLookup(control.io.out.rB, regFile.io.rd(1).data, Array(
+  val decodeRb = MuxLookup(control.io.out.rB, regFile.io.rd(1).data)(Array(
     RB_CONST_UI -> insn_ui(decodeInsn),
     RB_CONST_SI -> insn_si(decodeInsn).signExtend(16, bits),
     RB_CONST_UI_HI -> insn_ui(decodeInsn) ## 0.U(16.W),
@@ -103,7 +103,7 @@ class Core(bits: Int, memSize: Int, memFileName: String, resetAddr: Int, clockFr
 
   val decodeRs = regFile.io.rd(2).data
 
-  val decodeCarry = MuxLookup(control.io.out.carryIn, carry, Array(
+  val decodeCarry = MuxLookup(control.io.out.carryIn, carry)(Array(
     CA_0 -> 0.U,
     CA_1 -> 1.U
   ))
@@ -120,7 +120,7 @@ class Core(bits: Int, memSize: Int, memFileName: String, resetAddr: Int, clockFr
 
   // Execute
 
-  val executeFast = MuxLookup(ctrl.unit, true.B, Array(
+  val executeFast = MuxLookup(ctrl.unit, true.B)(Array(
     U_MUL -> false.B,
     U_DIV -> false.B
   ))
@@ -341,19 +341,19 @@ class Core(bits: Int, memSize: Int, memFileName: String, resetAddr: Int, clockFr
 
   // Memory
 
-  val memRegDataRc = MuxLookup(memUnit, memAdderOut, Array(
+  val memRegDataRc = MuxLookup(memUnit, memAdderOut)(Array(
     U_LOG -> memLogicalOut,
     U_ROT -> memRotatorOut,
     U_ZER -> memCountZeroesOut,
   ))
 
-  val memRegData = MuxLookup(memUnit, memRegDataRc, Array(
+  val memRegData = MuxLookup(memUnit, memRegDataRc)(Array(
     U_POP -> memPopulationCountOut,
     U_SPR -> memSprOut,
     U_CR  -> memCrOut,
   ))
 
-  val memCarryData = MuxLookup(memUnit, memAdderCarryOut, Array(
+  val memCarryData = MuxLookup(memUnit, memAdderCarryOut)(Array(
     U_ROT -> memRotatorCarryOut
   ))
 
@@ -387,11 +387,11 @@ class Core(bits: Int, memSize: Int, memFileName: String, resetAddr: Int, clockFr
 
   // Writeback
 
-  val wbRegData1 = MuxLookup(wbUnit, multiplier.io.out.bits, Array(
+  val wbRegData1 = MuxLookup(wbUnit, multiplier.io.out.bits)(Array(
     U_DIV -> divider.io.out.bits
   ))
 
-  val wbRegData2 = MuxLookup(wbUnit, wbRegData, Array(
+  val wbRegData2 = MuxLookup(wbUnit, wbRegData)(Array(
     U_MUL -> multiplier.io.out.bits,
     U_DIV -> divider.io.out.bits,
     U_LDST -> loadStore.io.out.bits
@@ -399,7 +399,7 @@ class Core(bits: Int, memSize: Int, memFileName: String, resetAddr: Int, clockFr
 
   val wbRcData1 = cmp(wbRegData1, wbRegData1(bits-1).asBool, false.B)
 
-  val wbRcData2 = MuxLookup(wbUnit, wbRcData, Array(
+  val wbRcData2 = MuxLookup(wbUnit, wbRcData)(Array(
     U_MUL -> wbRcData1,
     U_DIV -> wbRcData1
   ))
@@ -445,5 +445,5 @@ class Core(bits: Int, memSize: Int, memFileName: String, resetAddr: Int, clockFr
 }
 
 object CoreObj extends App {
-  (new ChiselStage).emitVerilog(new Core(64, 384*1024, "insns.hex", 0x0, 50000000))
+  ChiselStage.emitSystemVerilog(new Core(64, 384*1024, "insns.hex", 0x0, 50000000))
 }

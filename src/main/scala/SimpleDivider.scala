@@ -1,6 +1,6 @@
 import chisel3._
 import chisel3.util.{Valid, Decoupled, log2Ceil}
-import chisel3.stage.ChiselStage
+import circt.stage.ChiselStage
 
 class DividerInput(val bits: Int) extends Bundle {
   val dividend = UInt(bits.W)
@@ -35,8 +35,8 @@ class SimpleDivider(val bits: Int) extends Module {
     when (io.in.bits.is32bit) {
       val dividendTemp = WireDefault(io.in.bits.dividend(31, 0))
       when (io.in.bits.signed) {
-        dividendTemp := io.in.bits.dividend(31, 0).asSInt.abs().asUInt
-        divisor := io.in.bits.divisor(31, 0).asSInt.abs().asUInt
+        dividendTemp := io.in.bits.dividend(31, 0).asSInt.abs.asUInt
+        divisor := io.in.bits.divisor(31, 0).asSInt.abs.asUInt
         negativeResult := (io.in.bits.dividend(31) =/= io.in.bits.divisor(31))
       } .otherwise {
         divisor := io.in.bits.divisor(31, 0)
@@ -47,8 +47,8 @@ class SimpleDivider(val bits: Int) extends Module {
     } .otherwise {
       val dividendTemp = WireDefault(io.in.bits.dividend)
       when (io.in.bits.signed) {
-        dividendTemp := io.in.bits.dividend.asSInt.abs().asUInt
-        divisor := io.in.bits.divisor.asSInt.abs().asUInt
+        dividendTemp := io.in.bits.dividend.asSInt.abs.asUInt
+        divisor := io.in.bits.divisor.asSInt.abs.asUInt
         negativeResult := (io.in.bits.dividend(bits-1) =/= io.in.bits.divisor(bits-1))
       } .otherwise {
         divisor := io.in.bits.divisor
@@ -107,5 +107,5 @@ class SimpleDivider(val bits: Int) extends Module {
 }
 
 object SimpleDividerObj extends App {
-  (new ChiselStage).emitVerilog(new SimpleDivider(64))
+  ChiselStage.emitSystemVerilog(new SimpleDivider(64))
 }

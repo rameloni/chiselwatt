@@ -1,15 +1,17 @@
 import chisel3._
-import chiseltest._
+import tywaves.simulator.simulatorSettings.VcdTrace
+//import chiseltest._
+import tywaves.simulator.TywavesSimulator._
 import Control._
 import org.scalatest.flatspec.AnyFlatSpec
 
-class LoadStoreByteReverseTester extends AnyFlatSpec with ChiselScalatestTester  {
+class LoadStoreByteReverseTester extends AnyFlatSpec  {
   val x = BigInt("0123456789ABCDEF", 16)
   val bits = 64
 
   behavior of "LoadStoreByteReverse"
   it should "pass a unit test" in {
-    test(new LoadStoreByteReverse(bits)) { br =>
+    simulate(new LoadStoreByteReverse(bits), Seq(VcdTrace)) { br =>
       br.io.in.poke(x.U)
 
       br.io.length.poke(LEN_2B)

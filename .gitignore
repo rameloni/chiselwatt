@@ -26,3 +26,5 @@ samples/hello_world/hello_world.bin
 samples/hello_world/hello_world.elf
 samples/hello_world/hello_world.o
 samples/hello_world/head.o
+.idea
+.idea/

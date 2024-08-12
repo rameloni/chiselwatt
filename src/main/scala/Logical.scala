@@ -1,6 +1,6 @@
 import chisel3._
 import chisel3.util.{MuxCase, MuxLookup}
-import chisel3.stage.ChiselStage
+import circt.stage.ChiselStage
 
 import Control._
 import Helpers._
@@ -18,7 +18,7 @@ class Logical(bits: Int) extends Module {
 
   val b = Mux(io.invertIn.asBool, ~io.b, io.b)
 
-  val ext = MuxLookup(io.length, io.a.signExtend(8, bits), Array(
+  val ext = MuxLookup(io.length, io.a.signExtend(8, bits))(Array(
               LEN_2B -> io.a.signExtend(16, bits),
               LEN_4B -> io.a.signExtend(32, bits)))
 
@@ -33,5 +33,5 @@ class Logical(bits: Int) extends Module {
 }
 
 object LogicalObj extends App {
-  (new ChiselStage).emitVerilog(new Logical(64))
+  ChiselStage.emitSystemVerilog(new Logical(64))
 }

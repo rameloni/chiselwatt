@@ -1,8 +1,11 @@
 import chisel3._
-import chiseltest._
+//import chiseltest._
+//import chisel3.simulator.EphemeralSimulator._
+import tywaves.simulator.TywavesSimulator._
+import tywaves.simulator.simulatorSettings._
 import org.scalatest.flatspec.AnyFlatSpec
 
-class UartUnitTester extends AnyFlatSpec with ChiselScalatestTester {
+class UartUnitTester extends AnyFlatSpec {
   behavior of "Uart"
 
   val rxOverclock = 16
@@ -36,9 +39,11 @@ class UartUnitTester extends AnyFlatSpec with ChiselScalatestTester {
   }
 
   it should "pass a unit test" in {
-    test(new Uart(64, rxOverclock)).withAnnotations(Seq(WriteVcdAnnotation)) { u =>
+    simulate(new Uart(64, rxOverclock), Seq(VcdTrace, WithTywavesWaveforms(true)), simName = "simulation_uart")
+//      .withAnnotations(Seq(WriteVcdAnnotation))
+      { u =>
 
-      u.clock.setTimeout(10000)
+//      u.clock.setTimeout(10000)
 
       u.io.clockDivisor.poke(divider.U)
 

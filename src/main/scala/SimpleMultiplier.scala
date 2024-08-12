@@ -1,6 +1,6 @@
 import chisel3._
 import chisel3.util.{Valid, Decoupled, log2Ceil}
-import chisel3.stage.ChiselStage
+import circt.stage.ChiselStage
 
 import Helpers._
 
@@ -93,5 +93,5 @@ class SimpleMultiplier(val bits: Int) extends Module {
 }
 
 object SimpleMultiplierObj extends App {
-  (new ChiselStage).emitVerilog(new SimpleMultiplier(64))
+  ChiselStage.emitSystemVerilog(new SimpleMultiplier(64))
 }

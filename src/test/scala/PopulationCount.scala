@@ -1,10 +1,12 @@
 import chisel3._
-import chiseltest._
+import tywaves.simulator.simulatorSettings.VcdTrace
+//import chiseltest._
+import tywaves.simulator.TywavesSimulator._
 import Control._
 import TestValues._
 import org.scalatest.flatspec.AnyFlatSpec
 
-class PopulationCountUnitTester extends AnyFlatSpec with ChiselScalatestTester {
+class PopulationCountUnitTester extends AnyFlatSpec {
   behavior of "PopulationCount"
 
   private def popcntb(x: BigInt): BigInt = {
@@ -30,7 +32,7 @@ class PopulationCountUnitTester extends AnyFlatSpec with ChiselScalatestTester {
   private def popcntd(x: BigInt): BigInt = x.bitCount
 
   it should "pass a unit test" in {
-    test(new PopulationCount(64)) { p =>
+    simulate(new PopulationCount(64), Seq(VcdTrace)) { p =>
       p.io.length.poke(LEN_1B)
       for (x <- testValues) {
         p.io.a.poke(x.U)

@@ -1,6 +1,6 @@
 import chisel3._
 import chisel3.util.Decoupled
-import chisel3.stage.ChiselStage
+import circt.stage.ChiselStage
 
 class Nia(val bits: Int, val resetAddr: Int) extends Module {
   val io = IO(new Bundle {
@@ -25,5 +25,5 @@ class Nia(val bits: Int, val resetAddr: Int) extends Module {
 }
 
 object NiaObj extends App {
-  (new ChiselStage).emitVerilog(new Nia(32, 0x100))
+  println(ChiselStage.emitSystemVerilog(new Nia(32, 0x100)))
 }

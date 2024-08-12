@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScalaCompilerConfiguration">
+    <profile name="sbt 1" modules="chiselwatt_3614" />
+    <profile name="sbt 2" modules="chiselwatt">
+      <option name="reflectiveCalls" value="true" />
+      <option name="deprecationWarnings" value="true" />
+      <option name="featureWarnings" value="true" />
+      <parameters>
+        <parameter value="-Xcheckinit" />
+      </parameters>
+      <plugins>
+        <plugin path="$USER_HOME$/.ivy2/local/org.chipsalliance/chisel-plugin_2.13.14/6.4.3-tywaves-SNAPSHOT/jars/chisel-plugin_2.13.14.jar" />
+      </plugins>
+    </profile>
+  </component>
+</project>

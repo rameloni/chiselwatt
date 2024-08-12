@@ -1,12 +1,15 @@
 import chisel3._
-import chiseltest._
+import tywaves.simulator.simulatorSettings.VcdTrace
+//import chiseltest._
+//import chisel3.simulator.EphemeralSimulator._
+import tywaves.simulator.TywavesSimulator._
 import TestValues._
 import org.scalatest.flatspec.AnyFlatSpec
 
-class CountZeroesUnitTester extends AnyFlatSpec with ChiselScalatestTester {
+class CountZeroesUnitTester extends AnyFlatSpec {
   behavior of "CountZeroes"
   it should "pass a unit test" in {
-    test(new CountZeroes(64)) { c =>
+    simulate(new CountZeroes(64), Seq(VcdTrace)) { c =>
 
       def clz(x: BigInt): Int = {
         for (i <- 0 until 64) {
@@ -66,6 +69,7 @@ class CountZeroesUnitTester extends AnyFlatSpec with ChiselScalatestTester {
       for (x <- testValues) {
         c.io.a.poke(x.asUInt)
         c.io.out.expect(ctz32(x).asUInt)
+        c.clock.step()
       }
     }
   }

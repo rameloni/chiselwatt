@@ -1,6 +1,6 @@
 import chisel3._
+import circt.stage.ChiselStage
 import chisel3.util._
-import chisel3.stage.ChiselStage
 
 import Control._
 import Helpers._
@@ -55,7 +55,12 @@ class LoadStore(val bits: Int, val words: Int, val clockFreq: Int) extends Modul
   val signed = Reg(UInt(1.W))
   val byteReverse = Reg(UInt(1.W))
   val reservation = Reg(UInt(1.W))
-  val sIdle :: sStoreAccess :: sStoreIdle :: sLoadFormat :: sLoadReturn :: Nil = Enum(5)
+
+  object LoadStoreState extends ChiselEnum {
+    //    val sIdle :: sStoreAccess :: sStoreIdle :: sLoadFormat :: sLoadReturn :: Nil = Enum(5)
+    val sIdle, sStoreAccess, sStoreIdle, sLoadFormat, sLoadReturn, Nil = Value
+  }
+  import LoadStoreState._
   val state = RegInit(sIdle)
 
   val fifoLength = 128
@@ -105,7 +110,7 @@ class LoadStore(val bits: Int, val words: Int, val clockFreq: Int) extends Modul
       val offset = addr(log2Ceil(bits/8)-1, 0)
       val lookupTable = Seq(LEN_1B -> "h1".U, LEN_2B -> "h3".U, LEN_4B -> "hf".U, LEN_8B -> "hff".U)
       val mask = Wire(UInt((bits/8).W))
-      mask := MuxLookup(length, lookupTable.head._2, lookupTable) << offset
+      mask := MuxLookup(length, lookupTable.head._2)(lookupTable) << offset
 
       /* UART */
       when (addr(31, 8) === "hc00020".U) {
@@ -226,5 +231,5 @@ class LoadStoreWrapper(val bits: Int, val size: Int, val clockFreq: Int, filenam
 }
 
 object LoadStoreObj extends App {
-  (new ChiselStage).emitVerilog(new LoadStoreWrapper(64, 128*1024, 50000000, "test.hex"))
+  ChiselStage.emitSystemVerilog(new LoadStoreWrapper(64, 128*1024, 50000000, "test.hex"))
 }

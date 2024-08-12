@@ -1,9 +1,11 @@
 import chisel3._
-import chiseltest._
+import tywaves.simulator.simulatorSettings.VcdTrace
+//import chiseltest._
+import tywaves.simulator.TywavesSimulator._
 import TestValues._
 import org.scalatest.flatspec.AnyFlatSpec
 
-class SimpleDividerUnitTester extends AnyFlatSpec with ChiselScalatestTester {
+class SimpleDividerUnitTester extends AnyFlatSpec {
   behavior of "SimpleDivider"
 
   val tests = for {
@@ -53,7 +55,7 @@ class SimpleDividerUnitTester extends AnyFlatSpec with ChiselScalatestTester {
   }
 
   it should "pass a unit test" in {
-    test(new SimpleDivider(64)) { m =>
+    simulate(new SimpleDivider(64), Seq(VcdTrace)) { m =>
       runOneTest(m, divide)
 
       m.io.in.bits.extended.poke(true.B)

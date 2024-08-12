@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="sbt: org.chipsalliance:chisel_2.13:6.4.3-tywaves-SNAPSHOT:jar" external-system-id="SBT">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.ivy2/local/org.chipsalliance/chisel_2.13/6.4.3-tywaves-SNAPSHOT/jars/chisel_2.13.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.ivy2/local/org.chipsalliance/chisel_2.13/6.4.3-tywaves-SNAPSHOT/srcs/chisel_2.13-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,5 +1,5 @@
 import chisel3._
-import chisel3.stage.ChiselStage
+import circt.stage.ChiselStage
 
 class Adder(n: Int) extends Module {
   val io = IO(new Bundle {
@@ -34,5 +34,5 @@ class Adder(n: Int) extends Module {
 }
 
 object AdderObj extends App {
-  (new ChiselStage).emitVerilog(new Adder(64))
+  println(ChiselStage.emitSystemVerilog(new Adder(64)))
 }

@@ -1,14 +1,16 @@
 import chisel3._
-import chiseltest._
+import tywaves.simulator.simulatorSettings.VcdTrace
+//import chiseltest._
+import tywaves.simulator.TywavesSimulator._
 import org.scalatest.flatspec.AnyFlatSpec
 
-class RegisterFileUnitTester extends AnyFlatSpec with ChiselScalatestTester {
+class RegisterFileUnitTester extends AnyFlatSpec {
   behavior of "RegisterFile"
 
   it should "pass a unit test" in {
     val numRegs = 32
 
-    test(new RegisterFile(numRegs, 64, 2, 2, true)) { r =>
+    simulate(new RegisterFile(numRegs, 64, 2, 2, true), Seq(VcdTrace)) { r =>
       println("RegisterFileUnitTester begin")
 
       // Write initial values to registers

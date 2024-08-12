@@ -1,6 +1,6 @@
 import chisel3._
 import chisel3.util.log2Ceil
-import chisel3.stage.ChiselStage
+import circt.stage.ChiselStage
 
 import InstructionHelpers._
 
@@ -112,5 +112,5 @@ class Rotator(bits: Int) extends Module {
 }
 
 object RotatorObj extends App {
-  (new ChiselStage).emitVerilog(new Rotator(64))
+  ChiselStage.emitSystemVerilog(new Rotator(64))
 }

@@ -1,6 +1,6 @@
 import chisel3._
 import chisel3.util.{MuxLookup}
-import chisel3.stage.ChiselStage
+import circt.stage.ChiselStage
 
 import Control._
 import Helpers._
@@ -23,11 +23,11 @@ class LoadStoreByteReverse(bits: Int) extends Module {
     )
   )
   
-  io.out := MuxLookup(io.length, lookupTable.head._2, lookupTable)
+  io.out := MuxLookup(io.length, lookupTable.head._2)(lookupTable)
 }
 
 object LoadStoreByteReverseObj extends App {
-  (new ChiselStage).emitVerilog(new LoadStoreByteReverse(64))
+  ChiselStage.emitSystemVerilog(new LoadStoreByteReverse(64))
 }
 
 object LoadStoreByteReverse {

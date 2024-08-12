@@ -1,6 +1,6 @@
 import chisel3._
 import chisel3.util.{ListLookup}
-import chisel3.stage.ChiselStage
+import circt.stage.ChiselStage
 
 object Control {
   val Y = true.B
@@ -325,5 +325,5 @@ class Control(val n: Int) extends Module {
 }
 
 object ControlObj extends App {
-  (new ChiselStage).emitVerilog(new Control(64))
+  ChiselStage.emitSystemVerilog(new Control(64))
 }
