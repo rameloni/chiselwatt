@@ -1,10 +1,11 @@
 import chisel3._
 import circt.stage.ChiselStage
+import circt.stage.FirtoolOption
 import chisel3.util._
-
 import Control._
 import Helpers._
 import InstructionHelpers._
+import chisel3.stage.ChiselGeneratorAnnotation
 
 class Core(bits: Int, memSize: Int, memFileName: String, resetAddr: Int, clockFreq: Int) extends Module {
   val io = IO(new Bundle {
@@ -445,5 +446,7 @@ class Core(bits: Int, memSize: Int, memFileName: String, resetAddr: Int, clockFr
 }
 
 object CoreObj extends App {
-  ChiselStage.emitSystemVerilog(new Core(64, 384*1024, "insns.hex", 0x0, 50000000))
+  ChiselStage.emitSystemVerilogFile(new Core(64, 384*1024, "insns.hex", 0x0, 50000000))
+  (new ChiselStage(true)).execute(Array("--target", "verilog", "--firtool-binary-path", "firtool-type-dbg-info-0.1.3"),
+    Seq(ChiselGeneratorAnnotation(() => new Core(64, 384*1024, "insns.hex", 0x0, 50000000)), FirtoolOption("-g"), FirtoolOption("--parse-only")))
 }

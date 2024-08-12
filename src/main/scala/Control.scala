@@ -325,5 +325,5 @@ class Control(val n: Int) extends Module {
 }
 
 object ControlObj extends App {
-  ChiselStage.emitSystemVerilog(new Control(64))
+  ChiselStage.emitSystemVerilogFile(new Control(64))
 }

@@ -16,7 +16,11 @@ class MemoryBlackBoxUnitTester extends AnyFlatSpec {
     simulate(new MemoryBlackBoxWrapper(bits, words, filename), Seq(VcdTrace))
 //      .withAnnotations(Seq(VerilatorBackendAnnotation, WriteVcdAnnotation))
     { m =>
-
+      m.clock.step()
+      m.reset.poke(true.B)
+      m.clock.step()
+      m.reset.poke(false.B)
+      m.clock.step()
       m.io.fetchPort.addr.poke(0.U)
 
       m.clock.step()

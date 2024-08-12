@@ -1,10 +1,23 @@
 import chisel3._
-import chisel3.util.{HasBlackBoxInline, log2Ceil}
+import chisel3.util.{Cat, HasBlackBoxInline, Reverse, log2Ceil}
 import circt.stage.ChiselStage
 import chisel3.util.experimental.loadMemoryFromFile
 
 
+
+
 class MemoryBlackBox(val bits: Int, val words: Int, val filename: String) extends Module {
+  def readFileToSequence(filename: String): Seq[BigInt] = {
+    val bufferedSource = scala.io.Source.fromFile(filename)
+    try {
+      val lines = bufferedSource.getLines()
+//      println(lines.toSeq)
+      lines.map(line => BigInt(line, 16)).toSeq
+//      bufferedSource.getLines().toSeq
+    } finally {
+      bufferedSource.close()
+    }
+  }
   val io = IO(new Bundle() {
     val clock      = Input(Clock())
 
@@ -19,34 +32,57 @@ class MemoryBlackBox(val bits: Int, val words: Int, val filename: String) extend
 //    val ramOut      = Output(UInt((bits*words).W))
   })
 
+  object StateMem extends ChiselEnum {
+    val EMPTY, INITIALIZED = Value
+  }
+  val state = RegInit(StateMem.EMPTY)
 
   val ram = Mem(words, UInt(bits.W))
-    loadMemoryFromFile(ram, filename)
+  val memContent = readFileToSequence(filename)
+  println(memContent)
+//    loadMemoryFromFile(ram, filename)
 
-//  for(i <- 0 until words) {
-//    io.ramOut := ram(i)
-//  }
+  when(reset.asBool && state === StateMem.EMPTY) {
+    if(memContent.nonEmpty) {
+      // Read the file and initialize it
+      val x = if (memContent.length < words) memContent.length else words
+      for (i <- 0 until x) {
+        ram(i) := memContent(i).asUInt
+      }
+    }
+    state := StateMem.INITIALIZED
+  }
+
 
   io.readData1 := ram(io.addr1)
   io.readData2 := ram(io.readAddr2)
 
+  def ffo(pwidth:Int, in:UInt, newByte: UInt) : UInt = {
+    val ary = Wire(Vec(pwidth, Bool()))
+    ary(0) := in(0)
+    for(w <- 1 until pwidth) {
+      ary(w) := newByte(w-1)
+    }
+    val rval = Reverse(Cat(ary))
+    rval
+  }
+
+  def replaceBits(a: UInt, b: UInt, mask: UInt) = {
+    val a_cleared = a & (~mask).asUInt
+    val b_extracted = b & mask
+    a_cleared | b_extracted
+  }
   when(io.writeEnable1) {
+    val newVal = VecInit(ram(io.addr1).asBools)
     for (i <- 0 until bits/8) {
       when(io.writeMask1(i)) {
-//        ram(io.addr1)(i * 8 + 7, i * 8) := io.writeData1(i * 8 + 7, i * 8)
-        val (sIdx, eIdx) = (i * 8 + 7, i * 8)
-        val newBits = io.writeData1(sIdx, eIdx)
-        val oldBits = ram(io.addr1)
-
-        val mask = ((1 << (sIdx - eIdx + 1)) - 1).U
-
-        val bits = (oldBits & (~mask).asUInt) | (newBits << eIdx.U).asUInt
-
-
-        ram(io.addr1) := bits
-//        ram(io.addr1) := io.writeData1(i * 8 + 7, i * 8)
+        val newByte = io.writeData1(i * 8 + 7, i * 8)
+        for (j <- 0 until 8) {
+          newVal(i * 8 + j) := newByte(j)
+        }
       }
     }
+    ram.write(io.addr1, newVal.asUInt)
   }
 
 
@@ -117,10 +153,7 @@ class MemoryBlackBoxWrapper(val bits: Int, val words: Int, val filename: String)
     val loadStorePort = Flipped(new MemoryPort(bits, words, true))
     val fetchPort = Flipped(new MemoryPort(bits, words, false))
   })
-//  val ramOut = IO(Output(UInt((bits*words).W)))
 
-  val mem = Mem(words, UInt(bits.W))
-  loadMemoryFromFile(mem, filename)
   val m = Module(new MemoryBlackBox(bits, words, filename))
 
   m.io.clock := clock
@@ -133,7 +166,6 @@ class MemoryBlackBoxWrapper(val bits: Int, val words: Int, val filename: String)
 
   m.io.readAddr2 := io.fetchPort.addr
   io.fetchPort.readData := m.io.readData2
-//  ramOut <> m.io.ramOut
 }
 
 object MemoryBlackBoxObj extends App {

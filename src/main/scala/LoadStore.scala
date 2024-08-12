@@ -1,10 +1,11 @@
 import chisel3._
 import circt.stage.ChiselStage
+import circt.stage.FirtoolOption
 import chisel3.util._
-
 import Control._
 import Helpers._
 import LoadStoreByteReverse._
+import chisel3.stage.ChiselGeneratorAnnotation
 
 class LoadStoreInput(val bits: Int) extends Bundle {
   val a           = Input(UInt(bits.W))
@@ -57,10 +58,10 @@ class LoadStore(val bits: Int, val words: Int, val clockFreq: Int) extends Modul
   val reservation = Reg(UInt(1.W))
 
   object LoadStoreState extends ChiselEnum {
-    //    val sIdle :: sStoreAccess :: sStoreIdle :: sLoadFormat :: sLoadReturn :: Nil = Enum(5)
-    val sIdle, sStoreAccess, sStoreIdle, sLoadFormat, sLoadReturn, Nil = Value
+    val sIdle, sStoreAccess, sStoreIdle, sLoadFormat, sLoadReturn = Value
   }
   import LoadStoreState._
+//      val sIdle :: sStoreAccess :: sStoreIdle :: sLoadFormat :: sLoadReturn :: Nil = Enum(5)
   val state = RegInit(sIdle)
 
   val fifoLength = 128
@@ -232,4 +233,7 @@ class LoadStoreWrapper(val bits: Int, val size: Int, val clockFreq: Int, filenam
 
 object LoadStoreObj extends App {
   ChiselStage.emitSystemVerilog(new LoadStoreWrapper(64, 128*1024, 50000000, "test.hex"))
+
+  (new ChiselStage(true)).execute(Array("--target", "hw", "--firtool-binary-path", "firtool-type-dbg-info-0.1.3"),
+    Seq(ChiselGeneratorAnnotation(() => new LoadStoreWrapper(64, 128*1024, 50000000, "test.hex")),  FirtoolOption("-g")))
 }
