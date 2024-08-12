@@ -5,6 +5,14 @@ import circt.stage.ChiselStage
 import circt.stage.FirtoolOption
 import chisel3.util._
 import Control._
+import Control.RaRegs._
+import Control.RbRegs._
+import Control.CaRegs._
+import Control.RoutRegs._
+import Control.CmpRegs._
+import Control.FxmRegs._
+import Control.BrTarget._
+
 import Helpers._
 import InstructionHelpers._
 import chisel3.stage.ChiselGeneratorAnnotation

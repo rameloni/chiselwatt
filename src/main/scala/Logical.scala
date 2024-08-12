@@ -2,7 +2,7 @@ import chisel3._
 import chisel3.util.{MuxCase, MuxLookup}
 import circt.stage.ChiselStage
 
-import Control._
+import Control.LenEnum._
 import Control.InternalOps._
 import Helpers._
 
@@ -13,7 +13,7 @@ class Logical(bits: Int) extends Module {
     val internalOp = Input(Control.InternalOps())
     val invertIn   = Input(UInt(1.W))
     val invertOut  = Input(UInt(1.W))
-    val length     = Input(UInt(2.W))
+    val length     = Input(Control.LenEnum())
     val out        = Output(UInt(bits.W))
   })
 

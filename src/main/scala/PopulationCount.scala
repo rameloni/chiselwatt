@@ -2,18 +2,18 @@ import chisel3._
 import chisel3.util.{PopCount, MuxLookup}
 import circt.stage.ChiselStage
 
-import Control._
+import Control.LenEnum._
 import Helpers._
 
 class PopulationCount(bits: Int) extends Module {
   val io = IO(new Bundle {
     val a      = Input(UInt(bits.W))
-    val length = Input(UInt(2.W))
+    val length = Input(Control.LenEnum())
     val out    = Output(UInt(bits.W))
   })
 
   // Move helper to somewhere common
-  def lengthToBits(n: UInt) = {
+  def lengthToBits(n: Control.LenEnum.Type) = {
     val lengths = Seq(8, 16, 32, 64)
     val lengthNames = Seq(LEN_1B, LEN_2B, LEN_4B, LEN_8B)
 
@@ -46,7 +46,7 @@ class PopulationCount(bits: Int) extends Module {
     .map{ case (a, padWidth) => a.map(_.pad(padWidth)).reduce(_ ## _) }
   })
 
-  io.out := MuxLookup(io.length, popCounts.head._1)(popCounts)
+  io.out := MuxLookup(io.length, popCounts.head._1.asUInt)(popCounts)
 }
 
 object PopulationCountObj extends App {

@@ -1,7 +1,7 @@
 import chisel3._
 import chisel3.util.MuxLookup
 
-import Control._
+import Control.LenEnum._
 
 object Helpers {
   implicit class BitsHelpers(a: Bits) {
@@ -34,7 +34,7 @@ object Helpers {
   implicit class signExtend(a: Bits) {
     def signExtend(from: Int, to: Int): UInt = a(from-1, 0).asSInt.pad(to).asUInt
 
-    def signExtend(from: UInt): UInt = {
+    def signExtend(from: Control.LenEnum.Type): UInt = {
       val lookupTable = Seq(LEN_1B, LEN_2B, LEN_4B).zip(Seq(8, 16, 32).map(frm => a(frm-1, 0).asSInt.pad(a.getWidth).asUInt))
 
       MuxLookup(from, lookupTable.head._2)(lookupTable)
@@ -44,7 +44,7 @@ object Helpers {
   implicit class zeroExtend(a: Bits) {
     def zeroExtend(from: Int, to: Int): UInt = a(from-1, 0).pad(to)
 
-    def zeroExtend(from: UInt): UInt = {
+    def zeroExtend(from: Control.LenEnum.Type): UInt = {
       val lookupTable = Seq(LEN_1B, LEN_2B, LEN_4B, LEN_8B).zip(Seq(8, 16, 32, 64).map(frm => a(frm-1, 0).pad(a.getWidth)))
 
       MuxLookup(from, lookupTable.head._2)(lookupTable)

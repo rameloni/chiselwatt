@@ -2,14 +2,14 @@ import chisel3._
 import chisel3.util.{MuxLookup}
 import circt.stage.ChiselStage
 
-import Control._
+import Control.LenEnum._
 import Helpers._
 
 class LoadStoreByteReverse(bits: Int) extends Module {
   val io = IO(
     new Bundle {
       val in     = Input(UInt(bits.W))
-      val length = Input(UInt(2.W))
+      val length = Input(Control.LenEnum())
       val out    = Output(UInt(bits.W))
     }
   )
@@ -40,7 +40,7 @@ object LoadStoreByteReverse {
   def apply[A <: Data, B <: Data](in: A, length: B): UInt = {
     val count = Module(new LoadStoreByteReverse(in.getWidth))
     count.io.in := in.asUInt
-    count.io.length := length.asUInt
+    count.io.length := length
     count.io.out
   }
 }

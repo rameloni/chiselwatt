@@ -2,7 +2,7 @@ import chisel3._
 import tywaves.simulator.TywavesSimulator._
 import tywaves.simulator.simulatorSettings._
 //import chiseltest._
-import Control._
+import Control.LenEnum._
 import Control.InternalOps._
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -12,7 +12,7 @@ class LoadStoreUnitTester extends AnyFlatSpec {
   val filename =  System.getProperty("user.dir") + "/LoadStoreInsns.hex"
   val frequency = 50000000
 
-  private def doOneRead(m: LoadStoreWrapper, a: UInt, b: UInt, length: UInt, signed: UInt, byteReverse: UInt, expected: UInt) = {
+  private def doOneRead(m: LoadStoreWrapper, a: UInt, b: UInt, length: Control.LenEnum.Type, signed: UInt, byteReverse: UInt, expected: UInt) = {
       m.io.in.bits.a.poke(a)
       m.io.in.bits.b.poke(b)
       m.io.in.bits.internalOp.poke(LDST_LOAD)
@@ -34,7 +34,7 @@ class LoadStoreUnitTester extends AnyFlatSpec {
       m.clock.step()
   }
 
-  private def doOneWrite(m: LoadStoreWrapper, a: UInt, b: UInt, length: UInt, signed: UInt, byteReverse: UInt, data: UInt) = {
+  private def doOneWrite(m: LoadStoreWrapper, a: UInt, b: UInt, length: Control.LenEnum.Type, signed: UInt, byteReverse: UInt, data: UInt) = {
       m.io.in.bits.a.poke(a)
       m.io.in.bits.b.poke(b)
       m.io.in.bits.data.poke(data)

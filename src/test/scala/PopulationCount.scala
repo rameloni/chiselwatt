@@ -2,7 +2,7 @@ import chisel3._
 import tywaves.simulator.simulatorSettings.VcdTrace
 //import chiseltest._
 import tywaves.simulator.TywavesSimulator._
-import Control._
+import Control.LenEnum._
 import TestValues._
 import org.scalatest.flatspec.AnyFlatSpec
 
