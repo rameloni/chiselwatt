@@ -20,8 +20,7 @@ class CoreTest extends AnyFlatSpec {
         c.reset.poke(true.B)
         c.clock.step()
         c.reset.poke(false.B)
-        c.clock.step(100)
-        c.clock.step(1000)
+        c.clock.step(200)
 
     }
   }

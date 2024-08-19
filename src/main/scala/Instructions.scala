@@ -1,6 +1,208 @@
-import chisel3.util.BitPat
+import chisel3.{ChiselEnum, WireInit, when}
+import chisel3.util.{BitPat, is, switch}
 
+import scala.collection.immutable.HashMap
+
+object Opcodes extends ChiselEnum {
+  // Add/subtract
+  val ADD, ADDC, ADDE, ADDI, ADDIC, ADDIC_DOT, ADDIS, ADDME, ADDZE, SUBF, SUBFC, SUBFE, SUBFIC, SUBFME, SUBFZE, NEG,
+  // Logical
+  AND, ANDC, ANDI_DOT, ANDIS_DOT, EQV, NAND, NOR, OR, ORC, ORI, ORIS, XOR, XORI, XORIS, EXTSB, EXTSH, EXTSW,
+  // Rotate/shift
+  RLDCL, RLDCR, RLDIC, RLDICL, RLDICR, RLDIMI, RLWIMI, RLWINM, RLWNM, SLD, SLW, SRAD, SRADI, SRAW, SRAWI, SRD, SRW,
+  // Multiply
+  MULHD, MULHDU, MULHW, MULHWU, MULLD, MULLI, MULLW,
+  // Divide
+  DIVD, DIVDE, DIVDEU, DIVDU, DIVW, DIVWE, DIVWEU, DIVWU, MODSD, MODSW, MODUD, MODUW,
+  // Load/store
+  LBARX, LBZ, LBZCIX, LBZU, LBZUX, LBZX, LD, LDARX, LDBRX, LDCIX, LDU, LDUX, LDX, LHA, LHARX, LHAU, LHAUX, LHAX, LHBRX,
+  LHZ, LHZCIX, LHZU, LHZUX, LHZX, LWA, LWARX, LWAUX, LWAX, LWBRX, LWZ, LWZCIX, LWZU, LWZUX, LWZX, STB, STBCIX, STBCX_DOT,
+  STBU, STBUX, STBX, STD, STDBRX, STDCIX, STDCX_DOT, STDU, STDUX, STDX, STH, STHBRX, STHCIX, STHCX_DOT, STHU, STHUX, STHX,
+  STW, STWBRX, STWCIX, STWCX_DOT, STWU, STWUX, STWX,
+  // Branch and trap
+  B, BC, BCCTR, BCLR,
+  // Compare
+  CMPD, CMPW, CMPDI, CMPWI, CMPLD, CMPLW, CMPLDI, CMPLWI,
+  // CR
+  MFCR, MFOCRF, MTCRF, MTOCRF, MCRF,
+  // SPR read/write
+  MFSPR, MTSPR,
+  // Cache control
+  DCBF, DCBST, DCBT, DCBTST, ICBI, ICBT, ISYNC, SYNC,
+  // Population count
+  POPCNTB, POPCNTD, POPCNTW,
+  // Count zeroes
+  CNTLZD, CNTLZW, CNTTZD, CNTTZW,
+  TDI = Value
+
+  def fromInst(insn: chisel3.UInt): Opcodes.Type = {
+    // format:off
+    val result = WireInit(Opcodes.default)
+    when(insn === Instructions.ADD)                 {result := ADD         }
+      .elsewhen(insn === Instructions.ADDIC       ) {result := ADDIC       }
+      .elsewhen(insn === Instructions.ADDIC_DOT   ) {result := ADDIC_DOT   }
+      .elsewhen(insn === Instructions.ADDI        ) {result := ADDI        }
+      .elsewhen(insn === Instructions.ADDIS       ) {result := ADDIS       }
+      .elsewhen(insn === Instructions.SUBFIC      ) {result := SUBFIC      }
+      .elsewhen(insn === Instructions.ADD         ) {result := ADD         }
+      .elsewhen(insn === Instructions.ADDC        ) {result := ADDC        }
+      .elsewhen(insn === Instructions.ADDE        ) {result := ADDE        }
+      .elsewhen(insn === Instructions.ADDME       ) {result := ADDME       }
+      .elsewhen(insn === Instructions.ADDZE       ) {result := ADDZE       }
+      .elsewhen(insn === Instructions.SUBF        ) {result := SUBF        }
+      .elsewhen(insn === Instructions.SUBFC       ) {result := SUBFC       }
+      .elsewhen(insn === Instructions.SUBFE       ) {result := SUBFE       }
+      .elsewhen(insn === Instructions.SUBFME      ) {result := SUBFME      }
+      .elsewhen(insn === Instructions.SUBFZE      ) {result := SUBFZE      }
+      .elsewhen(insn === Instructions.NEG         ) {result := NEG         }
+      .elsewhen(insn === Instructions.ANDI_DOT    ) {result := ANDI_DOT    }
+      .elsewhen(insn === Instructions.ANDIS_DOT   ) {result := ANDIS_DOT   }
+      .elsewhen(insn === Instructions.AND         ) {result := AND         }
+      .elsewhen(insn === Instructions.ANDC        ) {result := ANDC        }
+      .elsewhen(insn === Instructions.NAND        ) {result := NAND        }
+      .elsewhen(insn === Instructions.ORI         ) {result := ORI         }
+      .elsewhen(insn === Instructions.ORIS        ) {result := ORIS        }
+      .elsewhen(insn === Instructions.NOR         ) {result := NOR         }
+      .elsewhen(insn === Instructions.OR          ) {result := OR          }
+      .elsewhen(insn === Instructions.ORC         ) {result := ORC         }
+      .elsewhen(insn === Instructions.XORI        ) {result := XORI        }
+      .elsewhen(insn === Instructions.XORIS       ) {result := XORIS       }
+      .elsewhen(insn === Instructions.EQV         ) {result := EQV         }
+      .elsewhen(insn === Instructions.XOR         ) {result := XOR         }
+      .elsewhen(insn === Instructions.EXTSB       ) {result := EXTSB       }
+      .elsewhen(insn === Instructions.EXTSH       ) {result := EXTSH       }
+      .elsewhen(insn === Instructions.EXTSW       ) {result := EXTSW       }
+      .elsewhen(insn === Instructions.RLWIMI      ) {result := RLWIMI      }
+      .elsewhen(insn === Instructions.RLWINM      ) {result := RLWINM      }
+      .elsewhen(insn === Instructions.RLWNM       ) {result := RLWNM       }
+      .elsewhen(insn === Instructions.RLDIC       ) {result := RLDIC       }
+      .elsewhen(insn === Instructions.RLDICL      ) {result := RLDICL      }
+      .elsewhen(insn === Instructions.RLDICR      ) {result := RLDICR      }
+      .elsewhen(insn === Instructions.RLDIMI      ) {result := RLDIMI      }
+      .elsewhen(insn === Instructions.RLDCL       ) {result := RLDCL       }
+      .elsewhen(insn === Instructions.RLDCR       ) {result := RLDCR       }
+      .elsewhen(insn === Instructions.SLD         ) {result := SLD         }
+      .elsewhen(insn === Instructions.SLW         ) {result := SLW         }
+      .elsewhen(insn === Instructions.SRAD        ) {result := SRAD        }
+      .elsewhen(insn === Instructions.SRADI       ) {result := SRADI       }
+      .elsewhen(insn === Instructions.SRAW        ) {result := SRAW        }
+      .elsewhen(insn === Instructions.SRAWI       ) {result := SRAWI       }
+      .elsewhen(insn === Instructions.SRD         ) {result := SRD         }
+      .elsewhen(insn === Instructions.SRW         ) {result := SRW         }
+      .elsewhen(insn === Instructions.LBZ         ) {result := LBZ         }
+      .elsewhen(insn === Instructions.LBZU        ) {result := LBZU        }
+      .elsewhen(insn === Instructions.LHA         ) {result := LHA         }
+      .elsewhen(insn === Instructions.LHAU        ) {result := LHAU        }
+      .elsewhen(insn === Instructions.LHZ         ) {result := LHZ         }
+      .elsewhen(insn === Instructions.LHZU        ) {result := LHZU        }
+      .elsewhen(insn === Instructions.LWA         ) {result := LWA         }
+      .elsewhen(insn === Instructions.LWZ         ) {result := LWZ         }
+      .elsewhen(insn === Instructions.LWZU        ) {result := LWZU        }
+      .elsewhen(insn === Instructions.LD          ) {result := LD          }
+      .elsewhen(insn === Instructions.LDU         ) {result := LDU         }
+      .elsewhen(insn === Instructions.LBARX       ) {result := LBARX       }
+      .elsewhen(insn === Instructions.LBZX        ) {result := LBZX        }
+      .elsewhen(insn === Instructions.LBZUX       ) {result := LBZUX       }
+      .elsewhen(insn === Instructions.LHARX       ) {result := LHARX       }
+      .elsewhen(insn === Instructions.LHAX        ) {result := LHAX        }
+      .elsewhen(insn === Instructions.LHAUX       ) {result := LHAUX       }
+      .elsewhen(insn === Instructions.LHBRX       ) {result := LHBRX       }
+      .elsewhen(insn === Instructions.LHZX        ) {result := LHZX        }
+      .elsewhen(insn === Instructions.LHZUX       ) {result := LHZUX       }
+      .elsewhen(insn === Instructions.LWARX       ) {result := LWARX       }
+      .elsewhen(insn === Instructions.LWAX        ) {result := LWAX        }
+      .elsewhen(insn === Instructions.LWAUX       ) {result := LWAUX       }
+      .elsewhen(insn === Instructions.LWBRX       ) {result := LWBRX       }
+      .elsewhen(insn === Instructions.LWZX        ) {result := LWZX        }
+      .elsewhen(insn === Instructions.LWZUX       ) {result := LWZUX       }
+      .elsewhen(insn === Instructions.LDARX       ) {result := LDARX       }
+      .elsewhen(insn === Instructions.LDBRX       ) {result := LDBRX       }
+      .elsewhen(insn === Instructions.LDX         ) {result := LDX         }
+      .elsewhen(insn === Instructions.LDUX        ) {result := LDUX        }
+      .elsewhen(insn === Instructions.STB         ) {result := STB         }
+      .elsewhen(insn === Instructions.STBU        ) {result := STBU        }
+      .elsewhen(insn === Instructions.STH         ) {result := STH         }
+      .elsewhen(insn === Instructions.STHU        ) {result := STHU        }
+      .elsewhen(insn === Instructions.STW         ) {result := STW         }
+      .elsewhen(insn === Instructions.STWU        ) {result := STWU        }
+      .elsewhen(insn === Instructions.STD         ) {result := STD         }
+      .elsewhen(insn === Instructions.STDU        ) {result := STDU        }
+      .elsewhen(insn === Instructions.STBCX_DOT   ) {result := STBCX_DOT   }
+      .elsewhen(insn === Instructions.STBX        ) {result := STBX        }
+      .elsewhen(insn === Instructions.STBUX       ) {result := STBUX       }
+      .elsewhen(insn === Instructions.STHBRX      ) {result := STHBRX      }
+      .elsewhen(insn === Instructions.STHCX_DOT   ) {result := STHCX_DOT   }
+      .elsewhen(insn === Instructions.STHX        ) {result := STHX        }
+      .elsewhen(insn === Instructions.STHUX       ) {result := STHUX       }
+      .elsewhen(insn === Instructions.STWBRX      ) {result := STWBRX      }
+      .elsewhen(insn === Instructions.STWCX_DOT   ) {result := STWCX_DOT   }
+      .elsewhen(insn === Instructions.STWX        ) {result := STWX        }
+      .elsewhen(insn === Instructions.STWUX       ) {result := STWUX       }
+      .elsewhen(insn === Instructions.STDBRX      ) {result := STDBRX      }
+      .elsewhen(insn === Instructions.STDCX_DOT   ) {result := STDCX_DOT   }
+      .elsewhen(insn === Instructions.STDX        ) {result := STDX        }
+      .elsewhen(insn === Instructions.STDUX       ) {result := STDUX       }
+      .elsewhen(insn === Instructions.MULLI       ) {result := MULLI       }
+      .elsewhen(insn === Instructions.MULHD       ) {result := MULHD       }
+      .elsewhen(insn === Instructions.MULHDU      ) {result := MULHDU      }
+      .elsewhen(insn === Instructions.MULHW       ) {result := MULHW       }
+      .elsewhen(insn === Instructions.MULHWU      ) {result := MULHWU      }
+      .elsewhen(insn === Instructions.MULLD       ) {result := MULLD       }
+      .elsewhen(insn === Instructions.MULLW       ) {result := MULLW       }
+      .elsewhen(insn === Instructions.DIVDEU      ) {result := DIVDEU      }
+      .elsewhen(insn === Instructions.DIVWEU      ) {result := DIVWEU      }
+      .elsewhen(insn === Instructions.DIVDE       ) {result := DIVDE       }
+      .elsewhen(insn === Instructions.DIVWE       ) {result := DIVWE       }
+      .elsewhen(insn === Instructions.DIVDU       ) {result := DIVDU       }
+      .elsewhen(insn === Instructions.DIVWU       ) {result := DIVWU       }
+      .elsewhen(insn === Instructions.DIVD        ) {result := DIVD        }
+      .elsewhen(insn === Instructions.DIVW        ) {result := DIVW        }
+      .elsewhen(insn === Instructions.MODUD       ) {result := MODUD       }
+      .elsewhen(insn === Instructions.MODUW       ) {result := MODUW       }
+      .elsewhen(insn === Instructions.MODSD       ) {result := MODSD       }
+      .elsewhen(insn === Instructions.MODSW       ) {result := MODSW       }
+      .elsewhen(insn === Instructions.SYNC        ) {result := SYNC        }
+      .elsewhen(insn === Instructions.ISYNC       ) {result := ISYNC       }
+      .elsewhen(insn === Instructions.DCBF        ) {result := DCBF        }
+      .elsewhen(insn === Instructions.DCBST       ) {result := DCBST       }
+      .elsewhen(insn === Instructions.DCBT        ) {result := DCBT        }
+      .elsewhen(insn === Instructions.DCBTST      ) {result := DCBTST      }
+      .elsewhen(insn === Instructions.ICBI        ) {result := ICBI        }
+      .elsewhen(insn === Instructions.ICBT        ) {result := ICBT        }
+      .elsewhen(insn === Instructions.CNTLZD      ) {result := CNTLZD      }
+      .elsewhen(insn === Instructions.CNTLZW      ) {result := CNTLZW      }
+      .elsewhen(insn === Instructions.CNTTZD      ) {result := CNTTZD      }
+      .elsewhen(insn === Instructions.CNTTZW      ) {result := CNTTZW      }
+      .elsewhen(insn === Instructions.POPCNTB     ) {result := POPCNTB     }
+      .elsewhen(insn === Instructions.POPCNTW     ) {result := POPCNTW     }
+      .elsewhen(insn === Instructions.POPCNTD     ) {result := POPCNTD     }
+      .elsewhen(insn === Instructions.CMPDI       ) {result := CMPDI       }
+      .elsewhen(insn === Instructions.CMPWI       ) {result := CMPWI       }
+      .elsewhen(insn === Instructions.CMPD        ) {result := CMPD        }
+      .elsewhen(insn === Instructions.CMPW        ) {result := CMPW        }
+      .elsewhen(insn === Instructions.CMPLDI      ) {result := CMPLDI      }
+      .elsewhen(insn === Instructions.CMPLWI      ) {result := CMPLWI      }
+      .elsewhen(insn === Instructions.CMPLD       ) {result := CMPLD       }
+      .elsewhen(insn === Instructions.CMPLW       ) {result := CMPLW       }
+      .elsewhen(insn === Instructions.MFSPR       ) {result := MFSPR       }
+      .elsewhen(insn === Instructions.MTSPR       ) {result := MTSPR       }
+      .elsewhen(insn === Instructions.MFCR        ) {result := MFCR        }
+      .elsewhen(insn === Instructions.MFOCRF      ) {result := MFOCRF      }
+      .elsewhen(insn === Instructions.MTCRF       ) {result := MTCRF       }
+      .elsewhen(insn === Instructions.MTOCRF      ) {result := MTOCRF      }
+      .elsewhen(insn === Instructions.MCRF        ) {result := MCRF        }
+      .elsewhen(insn === Instructions.B           ) {result := B           }
+      .elsewhen(insn === Instructions.BC          ) {result := BC          }
+      .elsewhen(insn === Instructions.BCLR        ) {result := BCLR        }
+      .elsewhen(insn === Instructions.BCCTR       ) {result := BCCTR       }
+      .elsewhen(insn === Instructions.TDI         ) {result := TDI         }
+      .otherwise { result := Opcodes.default }
+    result
+  }
+  val default = TDI
+}
 object Instructions {
+
   // Add/subtract
   def ADD       = BitPat("b011111???????????????0100001010?")
   def ADDC      = BitPat("b011111???????????????0000001010?")

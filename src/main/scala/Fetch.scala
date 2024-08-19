@@ -1,10 +1,11 @@
 import chisel3._
-import chisel3.util.log2Ceil
+import chisel3.util.{ListLookup, Lookup, MuxLookup, log2Ceil}
 
 class Fetch(val bits: Int, val words: Int) extends Module {
   val io = IO(new Bundle {
     val nia = Input(UInt(bits.W))
     val insn = Output(UInt(32.W))
+    val insnOpCode = Output(Opcodes())
     val mem = new MemoryPort(bits, words, false)
   })
 
@@ -26,4 +27,6 @@ class Fetch(val bits: Int, val words: Int) extends Module {
   } else {
     io.insn := io.mem.readData(31, 0)
   }
+
+  io.insnOpCode := Opcodes.fromInst(io.insn)
 }
