@@ -1,7 +1,6 @@
 import chisel3._
 import tywaves.simulator.TywavesSimulator._
 import tywaves.simulator.simulatorSettings._
-//import chiseltest._
 import Control.LenEnum._
 import Control.InternalOps._
 import org.scalatest.flatspec.AnyFlatSpec
@@ -30,7 +29,7 @@ class LoadStoreUnitTester extends AnyFlatSpec {
       m.clock.step()
 
       m.io.out.valid.expect(true.B)
-//      m.io.out.bits.expect(expected)
+      m.io.out.bits.expect(expected)
       m.clock.step()
   }
 
@@ -63,15 +62,13 @@ class LoadStoreUnitTester extends AnyFlatSpec {
   behavior of "LoadStore"
   it should "pass a unit test" in {
     simulate(new LoadStoreWrapper(bits, words, frequency, filename), Seq(VcdTrace, WithTywavesWaveforms(true), SaveWorkdirFile("workDir")))
-//      .withAnnotations(Seq(VerilatorBackendAnnotation, WriteVcdAnnotation))
       { m =>
         m.clock.step()
         m.reset.poke(true.B)
         m.clock.step()
         m.reset.poke(false.B)
-      // Load one byte
+
       doOneRead(m, 0.U, 0.U, LEN_1B, 0.U, 0.U, "h07".U)
-      // Load two bytes
       doOneRead(m, 0.U, 0.U, LEN_2B, 0.U, 0.U, "h0607".U)
       doOneRead(m, 0.U, 0.U, LEN_4B, 0.U, 0.U, "h04050607".U)
       doOneRead(m, 0.U, 0.U, LEN_8B, 0.U, 0.U, "h0001020304050607".U)
